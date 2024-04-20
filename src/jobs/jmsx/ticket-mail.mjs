@@ -210,4 +210,6 @@ export async function sendJmsxTicketMail() {
       fs.unlinkSync(pdfPath)
     }
   }
+
+  console.log('sendJmsxTicketMail done')
 }
