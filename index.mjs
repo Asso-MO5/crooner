@@ -10,4 +10,3 @@ const job = new CronJob(
 )
 console.log('Jobs started')
 job.start()
-sendJmsxTicketMail()

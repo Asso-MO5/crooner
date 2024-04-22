@@ -12,7 +12,7 @@ export async function sendJmsxTicketMail() {
   const { data: seats } = await supabase
     .from(tables.seats)
     .select('*')
-    // .neq('sended_state', sendStates.sent)
+    .neq('sended_state', sendStates.sent)
     .limit(10)
 
   console.log('Nombre de tickets à envoyer: ', seats.length)
