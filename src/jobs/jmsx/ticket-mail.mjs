@@ -2,7 +2,7 @@ import { mailer } from '../../services/mail.mjs'
 import { createServerClient } from '../../services/supabase.mjs'
 import { placeTypes, sendStates, tables } from './contants.mjs'
 import QRCode from 'qrcode'
-import { createCanvas, loadImage } from 'canvas'
+import { createCanvas, registerFont, loadImage } from 'canvas'
 import fs from 'fs'
 import path from 'path'
 import imgToPDF from 'image-to-pdf'
@@ -27,6 +27,7 @@ export async function sendJmsxTicketMail() {
   const heightPixels = Math.round((heightMM / 25.4) * DPI)
   const canvas = createCanvas(widthPixels, heightPixels)
   const ctx = canvas.getContext('2d')
+  registerFont('public/openSans.ttf', { family: 'openSans' })
 
   //=== images =======
 
@@ -46,11 +47,11 @@ export async function sendJmsxTicketMail() {
     ctx.drawImage(qrImage, 15, 910)
 
     // === TEXTS ===
-    ctx.font = 'bold 25px Sans'
+    ctx.font = 'bold 25px openSans'
     ctx.fillStyle = '#5955e0'
     ctx.fillText(`${seat.name} ${seat.lastname.toUpperCase()}`, 300, 1030)
 
-    ctx.font = '15px Sans'
+    ctx.font = '15px openSans'
     ctx.fillStyle = '#000000'
     ctx.fillText(`Valable le :`, 300, 1065)
 
