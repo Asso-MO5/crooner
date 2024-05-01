@@ -15,7 +15,7 @@ export async function sendJmsxTicketMail() {
     .neq('sended_state', sendStates.sent)
     .limit(10)
 
-  console.log('Nombre de tickets à envoyer: ', seats.length)
+  console.log('Nombre de tickets à envoyer: ', seats?.length || 0)
 
   //TODO rechercher dans nouvelle table l'état des emails.
 
