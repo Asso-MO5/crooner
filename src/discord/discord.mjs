@@ -57,8 +57,6 @@ for (const folder of commandFolders) {
     const filePath = path.join(commandsPath, file)
     const fileURL = pathToFileURL(filePath).href
 
-    console.log('🟡', filePath)
-
     import(fileURL)
       .then((item) => {
         const command = item.default
