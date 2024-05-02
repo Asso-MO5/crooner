@@ -11,8 +11,13 @@ const config = {
   },
 }
 
+let imp = null
+
 export async function watchMail() {
+  if (imp) return
+
   imaps.connect(config).then((connection) => {
+    imp = connection
     return connection.openBox('INBOX').then(async () => {
       const searchCriteria = ['UNSEEN']
 
@@ -70,6 +75,7 @@ export async function watchMail() {
 
         connection.moveMessage(result.attributes.uid, 'INBOX.Discord', () => {})
       }
+      connection.end()
     })
   })
 }
