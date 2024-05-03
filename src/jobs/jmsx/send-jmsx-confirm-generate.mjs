@@ -1,119 +1,29 @@
 import { mailer } from '../../services/mail.mjs'
 import { createServerClient } from '../../services/supabase.mjs'
-import { placeTypes, sendStates, tables } from './contants.mjs'
-import QRCode from 'qrcode'
-import { createCanvas, registerFont, loadImage } from 'canvas'
-import fs from 'fs'
-import path from 'path'
-import imgToPDF from 'image-to-pdf'
+import { sendStates, tables } from './contants.mjs'
 
-export async function sendJmsxTicketMail() {
+export async function sendJmsxConfirmGenerate() {
   const supabase = createServerClient()
   const { data: seats } = await supabase
     .from(tables.seats)
     .select('*')
-    .neq('sended_state', sendStates.sent)
+    .neq('token', null)
     .neq('sended_state', sendStates.renew)
     .limit(10)
 
-  console.log('Nombre de tickets à envoyer: ', seats?.length || 0)
-
-  //TODO rechercher dans nouvelle table l'état des emails.
-
-  // === Canvas ====
-  const DPI = 100 // Résolution en DPI
-  const widthMM = 210 // Largeur en mm pour A4
-  const heightMM = 297 // Hauteur en mm pour A4
-  const widthPixels = Math.round((widthMM / 25.4) * DPI)
-  const heightPixels = Math.round((heightMM / 25.4) * DPI)
-  const canvas = createCanvas(widthPixels, heightPixels)
-  const ctx = canvas.getContext('2d')
-  registerFont('public/openSans.ttf', { family: 'openSans' })
-
-  //=== images =======
-
-  const visitorTempLate = await loadImage('public/ticket.png')
-
-  // ==== PAGE ====
+  console.log('Nombre de mail de confirmation: ', seats?.length || 0)
 
   for (const seat of seats) {
-    ctx.drawImage(visitorTempLate, 0, 0)
-    const qrcodeDataUrl = await QRCode.toDataURL(seat.id, {
-      width: 250,
-      height: 250,
-    })
-
-    const qrImage = await loadImage(qrcodeDataUrl)
-
-    ctx.drawImage(qrImage, 15, 910)
-
-    // === TEXTS ===
-    ctx.font = 'bold 10px openSans'
-    ctx.fillStyle = 'black'
-    ctx.fillText(seat.id, 40, 915)
-
-    ctx.font = 'bold 25px openSans'
-    ctx.fillStyle = '#5955e0'
-    ctx.fillText(`${seat.name} ${seat.lastname.toUpperCase()}`, 300, 1030)
-
-    ctx.font = '15px openSans'
-    ctx.fillStyle = '#000000'
-    ctx.fillText(`Valable le :`, 300, 1065)
-
-    if (seat.day_one && seat.day_two) {
-      ctx.fillText(`Samedi 22 et dimanche 23 juin 2024`, 300, 1085)
-    }
-
-    if (seat.day_one && !seat.day_two) {
-      ctx.fillText(`Samedi 22 juin 2024`, 300, 1085)
-    }
-
-    if (!seat.day_one && seat.day_two) {
-      ctx.fillText(`Dimanche 23 juin 2024`, 300, 1085)
-    }
-
-    ctx.font = 'bold 30px Sans'
-    ctx.fillStyle = '#b95e51'
-    ctx.fillText(placeTypes[seat.type], 300, 1130)
-
-    const buff = Buffer.from(
-      canvas.toDataURL().replace('data:image/png;base64,', ''),
-      'base64'
-    )
-
-    const folderName = '_temp'
-
-    const dir = path.join(process.cwd(), folderName)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-
-    const fileName = `${seat.id}.pdf`
-    const pdfPath = path.join(dir, fileName)
-
-    await new Promise((resolve, reject) => {
-      imgToPDF([buff], imgToPDF.sizes.A4)
-        .pipe(fs.createWriteStream(path.join(folderName, fileName)))
-        .on('finish', resolve)
-        .on('error', reject)
-    })
-
     try {
       const info = await mailer.sendMail({
         from: '"JMSX" <jmsx@mo5.com>',
         to: seat.email,
-        attachments: [
-          {
-            filename: `jmsx_billet_${seat.transaction_id}.pdf`,
-            path: path.join(dir, fileName),
-          },
-        ],
         subject: 'Votre billet pour JMSX24',
         html: `
       <!DOCTYPE html>
 <html>
 <head>
-    <title>Votre Billet</title>
+    <title>confirmer</title>
 </head>
 <body
     style="background-color: black; color: white; font-family: 'Courier New', Courier, monospace; margin: 0; padding: 0;">
@@ -136,15 +46,14 @@ export async function sendJmsxTicketMail() {
                 </h2>
                 <div style="border: 1px solid #5955e0; padding: 10px;">
                     <p>Bonjour,</p>
-                    Nous sommes ravis de vous accueillir à la convention JMSX 2024 ! Veuillez trouver <b><u>ci-joint
-                            votre
-                            billet d'entrée.</b></u>
-                    Assurez-vous de l'imprimer ou de le garder accessible sur votre téléphone mobile pour faciliter
-                    votre entrée à
-                    l'événement.
+                    <p>Si vous avez bien demandé la génération de votre billet pour JMSX24, veuillez cliquer sur le lien
+                        suivant pour le confirmer:</p>
                     </p>
-                    <p>Nous vous remercions de votre confiance et nous réjouissons de vous accueillir prochainement.
+                    <br/><br/>
+                    <p>
+                    <a href="https://jmsx.mo5.com/generate/confirm/${seat.token}" style='color:#ded087;'>https://jmsx.mo5.com/generate/confirm/${seat.token}</a>
                     </p>
+                    <br/><br/>
                     <p>
                         Cordialement,
                     </p>
@@ -202,7 +111,9 @@ export async function sendJmsxTicketMail() {
 
       await supabase
         .from(tables.seats)
-        .update({ sended_state: sendStates.sent, sended_ticket: new Date() })
+        .update({
+          sended_state: sendStates.renew,
+        })
         .match({ id: seat.id })
 
       console.log('Message sent: %s', info.messageId, seat.email)
@@ -212,10 +123,6 @@ export async function sendJmsxTicketMail() {
         .from(tables.seats)
         .update({ sended_state: sendStates.error, sended_ticket: new Date() })
         .match({ id: seat.id })
-    } finally {
-      fs.unlinkSync(pdfPath)
     }
   }
-
-  console.log('sendJmsxTicketMail done')
 }

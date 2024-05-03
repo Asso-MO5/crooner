@@ -9,6 +9,7 @@ import duration from 'dayjs/plugin/duration.js'
 import fr from 'dayjs/locale/fr.js'
 import weekday from 'dayjs/plugin/weekday.js'
 import { watchMail } from './src/services/watch-mail.mjs'
+import { sendJmsxConfirmGenerate } from './src/jobs/jmsx/send-jmsx-confirm-generate.mjs'
 dayjs.extend(relativeTime)
 dayjs.extend(localizedFormat)
 dayjs.extend(timezone)
@@ -26,6 +27,14 @@ const sendJmsxTicketMailJob = new CronJob(
   'Europe/Paris' // timeZone
 )
 
+const sendJmsxConfirmGeneratelJob = new CronJob(
+  '*/5 * * * *',
+  sendJmsxConfirmGenerate,
+  () => console.log('sendJmsxTicketMail : ', 'Job done'),
+  true, // start
+  'Europe/Paris' // timeZone
+)
+
 const watchMailJob = new CronJob(
   '*/10 * * * *',
   watchMail,
@@ -35,6 +44,9 @@ const watchMailJob = new CronJob(
 )
 
 async function start() {
+  sendJmsxTicketMail()
+  sendJmsxConfirmGenerate()
+  sendJmsxConfirmGeneratelJob.start()
   const client = await botStart()
 
   watchMailJob.start()

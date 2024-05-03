@@ -27,7 +27,7 @@ export async function mail(interaction, client) {
         const email = emailLine.split(':')[1].trim()
         if (!email || !email?.includes('@')) return
         await mailer.sendMail({
-          from: '"JSMX" <jmsx@mo5.com>',
+          from: '"JMSX" <jmsx@mo5.com>',
           to: email,
           subject: 'JMSX24 - contact',
           text: `
