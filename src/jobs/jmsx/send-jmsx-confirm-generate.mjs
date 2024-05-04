@@ -13,6 +13,7 @@ export async function sendJmsxConfirmGenerate() {
 
   console.log('Nombre de mail de confirmation: ', seats?.length || 0)
 
+  if (!seats?.length) return
   for (const seat of seats) {
     try {
       const info = await mailer.sendMail({
