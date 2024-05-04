@@ -12,6 +12,10 @@ const cmd = {
     .setName('chifoumi')
     .setDescription('Joue au Chifoumi !! '),
   async execute(interaction) {
+    // ICI je récupère les roles de l'utilisateur qui utilise la commande
+    const memberRoles = interaction.member.roles.cache.map((role) => role.name)
+
+    console.log(memberRoles)
     const row = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(ChifoumiCustomId.stone)

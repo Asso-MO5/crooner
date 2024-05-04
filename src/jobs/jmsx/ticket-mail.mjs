@@ -14,6 +14,7 @@ export async function sendJmsxTicketMail() {
     .select('*')
     .neq('sended_state', sendStates.sent)
     .neq('sended_state', sendStates.renew)
+    .neq('sended_state', sendStates.pending)
     .limit(10)
 
   console.log('Nombre de tickets à envoyer: ', seats?.length || 0)

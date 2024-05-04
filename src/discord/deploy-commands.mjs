@@ -1,25 +1,37 @@
 import { REST, Routes } from 'discord.js'
 import fs from 'node:fs'
 import path from 'node:path'
+import { pathToFileURL } from 'node:url'
 
 const __dirname = path.resolve()
 
 const commands = []
 // Grab all the command folders from the commands directory you created earlier
-const foldersPath = path.join(__dirname, 'commands')
+const foldersPath = path.join(__dirname, '/src/discord/commands')
 const commandFolders = fs.readdirSync(foldersPath)
 
 for (const folder of commandFolders) {
   // Grab all the command files from the commands directory you created earlier
   const commandsPath = path.join(foldersPath, folder)
+
   const commandFiles = fs
     .readdirSync(commandsPath)
-    .filter((file) => file.endsWith('cmd.js'))
+    .filter((file) => file.endsWith('cmd.mjs'))
   // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
   for (const file of commandFiles) {
     const filePath = path.join(commandsPath, file)
-    const command = require(filePath)
-    commands.push(command.data.toJSON())
+    const fileURL = pathToFileURL(filePath).href
+
+    try {
+      const item = await import(fileURL)
+      const command = item.default
+      commands.push(command.data.toJSON()).then((item) => {})
+    } catch (error) {
+      console.error(
+        `Erreur lors de l'importation du fichier ${filePath}:`,
+        error
+      )
+    }
   }
 }
 

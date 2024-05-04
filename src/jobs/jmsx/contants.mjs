@@ -8,6 +8,7 @@ export const sendStates = {
   notSent: 'not_sent',
   error: 'error',
   renew: 'renew',
+  pending: 'pending',
 }
 
 export const placeTypes = {

@@ -51,7 +51,7 @@ export async function sendJmsxConfirmGenerate() {
                     </p>
                     <br/><br/>
                     <p>
-                    <a href="https://jmsx.mo5.com/generate/confirm/${seat.token}" style='color:#ded087;'>https://jmsx.mo5.com/generate/confirm/${seat.token}</a>
+                    <a href="https://jmsx.mo5.com/ticket/generer/confirm/${seat.token}" style='color:#ded087;'>https://jmsx.mo5.com/ticket/generer/confirm/${seat.token}</a>
                     </p>
                     <br/><br/>
                     <p>
