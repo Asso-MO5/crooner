@@ -25,7 +25,9 @@ for (const folder of commandFolders) {
     try {
       const item = await import(fileURL)
       const command = item.default
-      commands.push(command.data.toJSON()).then((item) => {})
+
+      console.log(`📦 Importation de la commande: ${command.data.name}`)
+      commands.push(command.data.toJSON())
     } catch (error) {
       console.error(
         `Erreur lors de l'importation du fichier ${filePath}:`,

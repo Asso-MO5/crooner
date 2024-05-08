@@ -1,6 +1,8 @@
 export const tables = {
   seats: 'seats',
   tickets: 'tickets',
+  guests: 'guests',
+  staff: 'staff',
 }
 
 export const sendStates = {
