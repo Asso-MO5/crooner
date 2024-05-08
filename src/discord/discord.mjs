@@ -83,7 +83,7 @@ for (const folder of commandFolders) {
       .then((item) => {
         const modale = item.default
         if ('customId' in modale && 'execute' in modale) {
-          buttons.push(modale)
+          modals.push(modale)
         } else {
           console.log(
             `🟥 🟥  le chemin ${filePath} ne possède pas de champ  "customId"  ou "execute".`
