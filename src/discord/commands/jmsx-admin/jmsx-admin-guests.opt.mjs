@@ -40,10 +40,6 @@ export const modalBtn = new ActionRowBuilder().addComponents(
 )
 
 export async function jsmxAdminGuestsOpt(interaction) {
-  const supabase = createServerClient()
-
-  //TODO add modal to add guest
-
   await interaction.editReply({
     content: await jsmxAdminGuestOptContent(),
     components: [modalBtn, jsmxAdminRow, returnBtn],
