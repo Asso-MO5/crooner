@@ -15,12 +15,13 @@ const cmd = {
       .from(tables.staff)
       .select('*')
       .eq('discord_id', interaction.user.id)
+      .single()
 
     // If the user is not in the staff table, we add him
     if (!IamHere) {
       await supabase.from(tables.staff).insert([
         {
-          discord_id: user.id,
+          discord_id: interaction.user.id,
           day_one: false,
           day_two: false,
         },
