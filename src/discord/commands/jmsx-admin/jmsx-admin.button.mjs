@@ -19,7 +19,10 @@ import {
 const btn = {
   customId: JmsxAdminCustomId.button,
   execute: async (interaction) => {
-    if (interaction.customId !== JmsxAdminCustomId.addGuest) {
+    if (
+      interaction.customId !== JmsxAdminCustomId.addGuest &&
+      interaction.customId !== JmsxAdminCustomId.deleteGuest
+    ) {
       await interaction.deferUpdate()
     }
 
@@ -45,7 +48,7 @@ const btn = {
     if (interaction.customId === JmsxAdminCustomId.addGuest) {
       const modal = new ModalBuilder()
         .setCustomId(JmsxAdminCustomId.addGuestModal)
-        .setTitle('Ajouter un invité')
+        .setTitle('Ajouter/ modifier un invité')
 
       const rows = [
         new TextInputBuilder()
@@ -86,6 +89,31 @@ const btn = {
       return await interaction.showModal(modal)
     }
 
+    // === Del guest ===
+
+    if (interaction.customId === JmsxAdminCustomId.deleteGuest) {
+      const modal = new ModalBuilder()
+        .setCustomId(JmsxAdminCustomId.deleteGuestModal)
+        .setTitle('supprimer un invité')
+
+      const rows = [
+        new TextInputBuilder()
+          .setCustomId(JmsxAdminCustomId.deleteGuestFields.id)
+          .setLabel("ID / nom de l'invité")
+          .setStyle(TextInputStyle.Short),
+        new TextInputBuilder()
+          .setCustomId(JmsxAdminCustomId.deleteGuestFields.confirm)
+          .setLabel('Confirmation')
+          .setPlaceholder('écrire "SUPPRIMER"')
+          .setStyle(TextInputStyle.Short),
+      ]
+
+      modal.addComponents(
+        ...rows.map((row) => new ActionRowBuilder().addComponents(row))
+      )
+
+      return await interaction.showModal(modal)
+    }
     // === Staff participation ===
 
     if (

@@ -36,7 +36,11 @@ export const modalBtn = new ActionRowBuilder().addComponents(
   new ButtonBuilder()
     .setCustomId(JmsxAdminCustomId.addGuest)
     .setLabel(`Ajouter / modifier un invité`)
-    .setStyle(ButtonStyle.Success)
+    .setStyle(ButtonStyle.Success),
+  new ButtonBuilder()
+    .setCustomId(JmsxAdminCustomId.deleteGuest)
+    .setLabel(`Supprimer un invité`)
+    .setStyle(ButtonStyle.Danger)
 )
 
 export async function jsmxAdminGuestsOpt(interaction) {

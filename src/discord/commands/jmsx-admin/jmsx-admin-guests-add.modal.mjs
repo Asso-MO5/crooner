@@ -1,8 +1,7 @@
 import { tables } from '../../../jobs/jmsx/contants.mjs'
 import { createServerClient } from '../../../services/supabase.mjs'
-import { jsmxAdminGuestOptContent, modalBtn } from './jmsx-admin-guests.opt.mjs'
+import { jsmxAdminGuestOptContent } from './jmsx-admin-guests.opt.mjs'
 import { JmsxAdminCustomId } from './jmsx-admin.custom-id.mjs'
-import { jsmxAdminRow, returnBtn } from './jmsx-admin.utils.mjs'
 
 function checkDay(day, defaultValue = false) {
   if (!day) return defaultValue
@@ -75,7 +74,6 @@ const modal = {
 
     interaction.editReply({
       content: await jsmxAdminGuestOptContent(),
-      components: [modalBtn, jsmxAdminRow, returnBtn],
     })
   },
 }
