@@ -1,5 +1,6 @@
 import { tables } from '../../../jobs/jmsx/contants.mjs'
 import { createServerClient } from '../../../services/supabase.mjs'
+import { jsmxAdminSeatsOpt } from './jmsx-admin-seats.opt.mjs'
 import { jsmxAdminStaffOptContent } from './jmsx-admin-staff.opt.mjs'
 import { JmsxAdminCustomId } from './jmsx-admin.custom-id.mjs'
 import {
@@ -22,12 +23,22 @@ const btn = {
       await interaction.deferUpdate()
     }
 
+    // === Seats ===
+    if (interaction.customId.includes(JmsxAdminCustomId.pagination_seats)) {
+      const page = interaction.customId.split('-').pop()
+      const type = interaction.customId.replace(`-${page}`, '').split('-').pop()
+      return await interaction.editReply({
+        content: await jsmxAdminSeatsOpt(interaction, type, page),
+      })
+    }
+
+    // === Return ===
+
     if (interaction.customId === JmsxAdminCustomId.return) {
-      await interaction.editReply({
+      return await interaction.editReply({
         content: await getContentInfos(),
         components: [jsmxAdminRow],
       })
-      return
     }
 
     // === Guests participation ===
