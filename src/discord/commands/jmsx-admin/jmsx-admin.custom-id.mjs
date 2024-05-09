@@ -19,8 +19,15 @@ export const JmsxAdminCustomId = {
     day_one: `${prefix}-participation-day-one`,
     day_two: `${prefix}-participation-day-two`,
   },
+  pagination_seats: `${prefix}-pagination-seats`,
   addGuestModal: `${prefix}-add-guest-modal`,
   addGuest: `${prefix}-add-guest`,
+  deleteGuest: `${prefix}-delete-guest`,
+  deleteGuestModal: `${prefix}-delete-guest-modal`,
+  deleteGuestFields: {
+    id: `${prefix}-delete-guest-id`,
+    confirm: `${prefix}-delete-guest-confirm`,
+  },
   addGuestFields: {
     id: `${prefix}-add-guest-id`,
     name: `${prefix}-add-guest-name`,

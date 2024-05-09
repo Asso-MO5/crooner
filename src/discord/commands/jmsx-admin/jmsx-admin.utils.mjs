@@ -75,6 +75,31 @@ _Stats provided with ❤️ by JMSX Kazerlelutin bot
 `
 }
 
+export function createPaginationSeats(type, _page, noNext = false) {
+  const row = []
+  const page = parseInt(_page)
+  if (page > 1) {
+    row.push(
+      new ButtonBuilder()
+        .setCustomId(
+          `${JmsxAdminCustomId.pagination_seats}-${type}-${page - 1}`
+        )
+        .setLabel(`Précédent`)
+        .setStyle(ButtonStyle.Secondary)
+    )
+  }
+
+  if (noNext) return new ActionRowBuilder().addComponents(...row)
+  row.push(
+    new ButtonBuilder()
+      .setCustomId(`${JmsxAdminCustomId.pagination_seats}-${type}-${page + 1}`)
+      .setLabel(`Suivant`)
+      .setStyle(ButtonStyle.Secondary)
+  )
+
+  return new ActionRowBuilder().addComponents(...row)
+}
+
 export function participationRow(day_one, day_two) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()

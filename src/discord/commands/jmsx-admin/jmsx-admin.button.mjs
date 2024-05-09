@@ -1,5 +1,6 @@
 import { tables } from '../../../jobs/jmsx/contants.mjs'
 import { createServerClient } from '../../../services/supabase.mjs'
+import { jsmxAdminSeatsOpt } from './jmsx-admin-seats.opt.mjs'
 import { jsmxAdminStaffOptContent } from './jmsx-admin-staff.opt.mjs'
 import { JmsxAdminCustomId } from './jmsx-admin.custom-id.mjs'
 import {
@@ -18,23 +19,36 @@ import {
 const btn = {
   customId: JmsxAdminCustomId.button,
   execute: async (interaction) => {
-    if (interaction.customId !== JmsxAdminCustomId.addGuest) {
+    if (
+      interaction.customId !== JmsxAdminCustomId.addGuest &&
+      interaction.customId !== JmsxAdminCustomId.deleteGuest
+    ) {
       await interaction.deferUpdate()
     }
 
+    // === Seats ===
+    if (interaction.customId.includes(JmsxAdminCustomId.pagination_seats)) {
+      const page = interaction.customId.split('-').pop()
+      const type = interaction.customId.replace(`-${page}`, '').split('-').pop()
+      return await interaction.editReply({
+        content: await jsmxAdminSeatsOpt(interaction, type, page),
+      })
+    }
+
+    // === Return ===
+
     if (interaction.customId === JmsxAdminCustomId.return) {
-      await interaction.editReply({
+      return await interaction.editReply({
         content: await getContentInfos(),
         components: [jsmxAdminRow],
       })
-      return
     }
 
     // === Guests participation ===
     if (interaction.customId === JmsxAdminCustomId.addGuest) {
       const modal = new ModalBuilder()
         .setCustomId(JmsxAdminCustomId.addGuestModal)
-        .setTitle('Ajouter un invité')
+        .setTitle('Ajouter/ modifier un invité')
 
       const rows = [
         new TextInputBuilder()
@@ -75,6 +89,31 @@ const btn = {
       return await interaction.showModal(modal)
     }
 
+    // === Del guest ===
+
+    if (interaction.customId === JmsxAdminCustomId.deleteGuest) {
+      const modal = new ModalBuilder()
+        .setCustomId(JmsxAdminCustomId.deleteGuestModal)
+        .setTitle('supprimer un invité')
+
+      const rows = [
+        new TextInputBuilder()
+          .setCustomId(JmsxAdminCustomId.deleteGuestFields.id)
+          .setLabel("ID / nom de l'invité")
+          .setStyle(TextInputStyle.Short),
+        new TextInputBuilder()
+          .setCustomId(JmsxAdminCustomId.deleteGuestFields.confirm)
+          .setLabel('Confirmation')
+          .setPlaceholder('écrire "SUPPRIMER"')
+          .setStyle(TextInputStyle.Short),
+      ]
+
+      modal.addComponents(
+        ...rows.map((row) => new ActionRowBuilder().addComponents(row))
+      )
+
+      return await interaction.showModal(modal)
+    }
     // === Staff participation ===
 
     if (
