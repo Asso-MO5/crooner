@@ -104,11 +104,15 @@ export function participationRow(day_one, day_two) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(JmsxAdminCustomId.participation.day_one)
-      .setLabel(day_one ? 'Je ne viens pas' : 'Je viens' + ' samedi')
+      .setLabel(
+        day_one ? 'Je ne viens pas' + ' samedi' : 'Je viens' + ' samedi'
+      )
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId(JmsxAdminCustomId.participation.day_two)
-      .setLabel(day_two ? 'Je ne viens pas' : 'Je viens' + ' dimanche')
+      .setLabel(
+        day_two ? 'Je ne viens pas' + ' dimanche' : 'Je viens' + ' dimanche'
+      )
       .setStyle(ButtonStyle.Primary)
   )
 }
