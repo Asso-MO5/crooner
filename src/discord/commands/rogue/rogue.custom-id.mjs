@@ -2,6 +2,7 @@ export const rogueCustomId = {
   play: 'rogue-btn-play',
   score: 'rogue-btn-score',
   btn: 'rogue-btn',
+  reset: 'rogue-btn-reset',
   ctrl: {
     up: 'rogue-btn-ctrl-up',
     down: 'rogue-btn-ctrl-down',

@@ -15,4 +15,11 @@ function loadGameState(id) {
   return null
 }
 
-export { saveGameState, loadGameState }
+function deleteGameState(id) {
+  const saveFile = gameStateFile.replace('[ID]', id)
+  if (fs.existsSync(saveFile)) {
+    fs.unlinkSync(saveFile)
+  }
+}
+
+export { saveGameState, loadGameState, deleteGameState }

@@ -1,7 +1,7 @@
 import { ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js'
 import { rogueCustomId } from './rogue.custom-id.mjs'
-import { saveGameState, loadGameState } from './game-state.mjs'
-import { mainMsg } from './rogue.utils.mjs'
+import { saveGameState, loadGameState, deleteGameState } from './game-state.mjs'
+import { mainMsg, mainRow } from './rogue.utils.mjs'
 
 // === BUTTONS ========================================
 const upBtn = new ButtonBuilder()
@@ -28,6 +28,7 @@ const inventoryBtn = new ButtonBuilder()
   .setCustomId(rogueCustomId.ctrl.inventory)
   .setLabel('🎒')
   .setStyle(ButtonStyle.Success)
+  .setDisabled(true)
 
 const quitBtn = new ButtonBuilder()
   .setCustomId(rogueCustomId.ctrl.quit)
@@ -59,7 +60,6 @@ const blank_4 = new ButtonBuilder()
   .setStyle(ButtonStyle.Secondary)
   .setDisabled(true)
 
-// === Action rows ========================
 // === Setup initial ===
 const mapWidth = 20
 const mapHeight = 30
@@ -68,6 +68,7 @@ const wallEmoji = '🧱'
 const unexploredEmoji = '🌑'
 const playerSymbol = ['😃', '🙂', '😵', '😟', '🤕', '😡']
 const exitEmoji = '🚪'
+const deathEmoji = '💀'
 
 const enemySymbols = {
   virus: '🦠',
@@ -82,9 +83,9 @@ const itemSymbols = {
   chest: '💰',
 }
 
-const depotEmoji = '🏠'
+const depotEmoji = '📥'
 
-let player, enemies, items, map, explored, messages, level, score
+let player, enemies, items, map, explored, messages, level, score, isGameOver
 
 function save(id) {
   saveGameState(
@@ -97,10 +98,12 @@ function save(id) {
       messages,
       level,
       score,
+      isGameOver,
     },
     id
   )
 }
+
 function initializeGameState() {
   player = {
     x: Math.floor(mapWidth / 2),
@@ -124,6 +127,7 @@ function initializeGameState() {
   messages = ['']
   level = 1
   score = 0
+  isGameOver = false
   initializeMap()
   placeEnemies(5)
   placeItems(3)
@@ -144,23 +148,37 @@ function initializeMap() {
     map.push(row)
     explored.push(exploredRow)
   }
+  createInitialRoom()
   generateRooms()
   map[player.y][player.x] = player.symbol[0]
   revealArea(player.x, player.y)
 }
 
+function createInitialRoom() {
+  const initialRoomWidth = 5
+  const initialRoomHeight = 5
+  const startX = Math.floor(player.x - initialRoomWidth / 2)
+  const startY = Math.floor(player.y - initialRoomHeight / 2)
+
+  for (let y = startY; y < startY + initialRoomHeight; y++) {
+    for (let x = startX; x < startX + initialRoomWidth; x++) {
+      if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight) {
+        map[y][x] = floorEmoji
+      }
+    }
+  }
+}
+
 function generateRooms() {
   const roomCount = 5
-  let prevRoom = null
+  let prevRoom = { x: player.x, y: player.y, width: 5, height: 5 }
   for (let i = 0; i < roomCount; i++) {
-    const roomWidth = Math.floor(Math.random() * 6) + 10
-    const roomHeight = Math.floor(Math.random() * 6) + 10
+    const roomWidth = Math.floor(Math.random() * 6) + 4
+    const roomHeight = Math.floor(Math.random() * 6) + 4
     const x = Math.floor(Math.random() * (mapWidth - roomWidth - 1)) + 1
     const y = Math.floor(Math.random() * (mapHeight - roomHeight - 1)) + 1
     createRoom(x, y, roomWidth, roomHeight)
-    if (prevRoom) {
-      connectRooms(prevRoom, { x, y, width: roomWidth, height: roomHeight })
-    }
+    connectRooms(prevRoom, { x, y, width: roomWidth, height: roomHeight })
     prevRoom = { x, y, width: roomWidth, height: roomHeight }
   }
 }
@@ -238,6 +256,40 @@ function revealArea(centerX, centerY, radius = 2) {
   }
 }
 
+function moveEnemy(enemy, dx, dy) {
+  const newX = enemy.x + dx
+  const newY = enemy.y + dy
+  if (newX >= 0 && newX < mapWidth && newY >= 0 && newY < mapHeight) {
+    if (map[newY][newX] === floorEmoji) {
+      enemies = enemies.filter((e) => e !== enemy)
+      map[enemy.y][enemy.x] = floorEmoji
+      enemy.x = newX
+      enemy.y = newY
+      map[enemy.y][enemy.x] = enemy.symbol
+      enemies.push(enemy)
+    }
+  }
+}
+
+function moveVisibleEnemies() {
+  enemies.forEach((enemy) => {
+    const { x, y } = enemy
+    const isVisible = explored[y][x]
+    if (!isVisible) return
+    const dx = player.x - x
+    const dy = player.y - y
+    const absDx = Math.abs(dx)
+    const absDy = Math.abs(dy)
+    if (absDx > absDy) {
+      if (dx > 0) moveEnemy(enemy, 1, 0)
+      else moveEnemy(enemy, -1, 0)
+    } else {
+      if (dy > 0) moveEnemy(enemy, 0, 1)
+      else moveEnemy(enemy, 0, -1)
+    }
+  })
+}
+
 function drawInterface() {
   let interfaceString = '```\n'
   for (let y = 0; y < mapHeight; y++) {
@@ -269,15 +321,30 @@ export async function game(interaction) {
     explored = gameState.explored
     level = gameState.level
     score = gameState.score
+    isGameOver = gameState.isGameOver
+
+    if (gameState.isGameOver) deleteGameState(id)
   } else {
     resetGame(id)
   }
 
+  if (isGameOver) {
+    return await interaction.editReply({
+      content: `
+Vous êtes mort ! 😵
+Score : **${score}** points
+ 
+--- Fin de la partie ---
+`,
+      components: [mainRow],
+    })
+  }
+
   // Gérer les interactions de boutons
-  if (customId === rogueCustomId.ctrl.up) movePlayer(0, -1, id)
-  if (customId === rogueCustomId.ctrl.down) movePlayer(0, 1, id)
-  if (customId === rogueCustomId.ctrl.left) movePlayer(-1, 0, id)
-  if (customId === rogueCustomId.ctrl.right) movePlayer(1, 0, id)
+  if (customId === rogueCustomId.ctrl.up) await movePlayer(0, -1, interaction)
+  if (customId === rogueCustomId.ctrl.down) await movePlayer(0, 1, interaction)
+  if (customId === rogueCustomId.ctrl.left) await movePlayer(-1, 0, interaction)
+  if (customId === rogueCustomId.ctrl.right) await movePlayer(1, 0, interaction)
   if (customId === rogueCustomId.ctrl.inventory) {
     //TODO : Ouvrir l'inventaire
   }
@@ -352,6 +419,18 @@ export async function game(interaction) {
     bonusBtn
   )
 
+  if (isGameOver) {
+    deleteGameState(id)
+    return await interaction.editReply({
+      content: `
+        Vous êtes mort ! 😵
+        Score : **${score}** points
+        --- Fin de la partie ---
+        `,
+      components: [mainRow],
+    })
+  }
+
   await interaction.editReply({
     content: drawInterface(),
     components: [firstRow, secondRow, thirdRow, statsRow],
@@ -366,7 +445,8 @@ function getIndexSymbolByLife() {
   return player.symbol[symbolIndex]
 }
 
-function movePlayer(dx, dy, id) {
+async function movePlayer(dx, dy, interaction) {
+  const id = interaction.user.id
   const newX = player.x + dx
   const newY = player.y + dy
 
@@ -383,7 +463,8 @@ function movePlayer(dx, dy, id) {
       map[newY][newX] === enemySymbols.troll
     ) {
       const enemy = enemies.find((e) => e.x === newX && e.y === newY)
-      fightEnemy(enemy, id)
+      await fightEnemy(enemy, interaction)
+      if (player.health <= 0) return
     } else if (Object.values(itemSymbols).includes(map[newY][newX])) {
       collectItem(map[newY][newX], newX, newY, id)
     } else if (map[newY][newX] === exitEmoji) {
@@ -397,11 +478,13 @@ function movePlayer(dx, dy, id) {
       map[player.y][player.x] = getIndexSymbolByLife()
       revealArea(player.x, player.y)
     }
+    moveVisibleEnemies()
     drawInterface() // Mettre à jour l'interface après le déplacement
   }
 }
 
-function fightEnemy(enemy, id) {
+async function fightEnemy(enemy, interaction) {
+  const id = interaction.user.id
   while (player.health > 0 && enemy.health > 0) {
     enemy.health -= Math.max(player.attack - enemy.defense, 0)
     if (enemy.health > 0)
@@ -409,11 +492,20 @@ function fightEnemy(enemy, id) {
   }
 
   if (player.health > 0) {
-    map[enemy.y][enemy.x] = '☠️'
+    map[enemy.y][enemy.x] = deathEmoji
     enemies = enemies.filter((e) => e !== enemy)
   } else {
-    alert('Vous êtes mort!')
-    resetGame(id)
+    isGameOver = true
+    save(id)
+    return await interaction.editReply({
+      content: `
+Vous êtes mort ! 😵
+Score : **${score}** points
+ 
+--- Fin de la partie ---
+`,
+      components: [mainRow],
+    })
   }
   drawInterface()
 }
@@ -429,13 +521,31 @@ function collectItem(item, x, y, id) {
   drawInterface()
 }
 
-function placeEnemies(enemyCount) {
+function placeEnemies(enemyCount, closeToPlayer = false) {
   for (let i = 0; i < enemyCount; i++) {
     let x, y
-    do {
-      x = Math.floor(Math.random() * mapWidth)
-      y = Math.floor(Math.random() * mapHeight)
-    } while (map[y][x] !== floorEmoji)
+    if (closeToPlayer) {
+      let attempts = 0
+      do {
+        x = player.x + Math.floor(Math.random() * 5) - 2
+        y = player.y + Math.floor(Math.random() * 5) - 2
+        attempts++
+      } while (
+        (x === player.x && y === player.y) || // Not on player's position
+        (Math.abs(x - player.x) <= 1 && Math.abs(y - player.y) <= 1) || // At least 2 cells away
+        x < 0 ||
+        x >= mapWidth ||
+        y < 0 ||
+        y >= mapHeight || // Within map boundaries
+        (map[y][x] !== floorEmoji && // On a floor tile
+          attempts < 100) // Prevent infinite loop
+      )
+    } else {
+      do {
+        x = Math.floor(Math.random() * mapWidth)
+        y = Math.floor(Math.random() * mapHeight)
+      } while (map[y][x] !== floorEmoji)
+    }
 
     const enemyType =
       Object.keys(enemySymbols)[
@@ -498,18 +608,13 @@ function nextLevel(id) {
 }
 
 function depositItems(id) {
-  const depositedItems = player.inventory.filter(
-    (item) =>
-      item === itemSymbols.crt ||
-      item === itemSymbols.pc ||
-      item === itemSymbols.game
-  )
-  const depositedScore = depositedItems.length * 10
-  score += depositedScore
-  player.inventory = player.inventory.filter(
-    (item) => !depositedItems.includes(item)
-  )
-  messages.push(`Vous avez déposé des objets pour ${depositedScore} points!`)
+  Object.keys(player.inventory).forEach((key) => {
+    score += player.inventory[key] * 10 * level
+    player.inventory[key] = 0
+  })
+  //Faire poper un ennemi
+  placeEnemies(1, true)
+
   save(id)
   drawInterface()
 }

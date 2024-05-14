@@ -1,3 +1,4 @@
+import { deleteGameState } from './game-state.mjs'
 import { rogueCustomId } from './rogue.custom-id.mjs'
 import { game } from './rogue.game.mjs'
 
@@ -14,6 +15,14 @@ const btn = {
       return
     }
 
+    if (interaction.customId === rogueCustomId.reset) {
+      deleteGameState(interaction.user.id)
+      await interaction.editReply({
+        content: 'Réinitialisation du jeu',
+      })
+
+      return
+    }
     if (
       interaction.customId === rogueCustomId.play ||
       interaction.customId.match(/rogue-btn-ctrl/)
