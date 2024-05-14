@@ -109,7 +109,10 @@ function initializeGameState() {
     health: 100,
     attack: 10,
     defense: 5,
-    inventory: [],
+    inventory: Object.values(itemSymbols).reduce((acc, item) => {
+      acc[item] = 0
+      return acc
+    }, {}),
     armor: '-',
     weapon: '-',
     bonus: '-',
@@ -416,10 +419,12 @@ function fightEnemy(enemy, id) {
 }
 
 function collectItem(item, x, y, id) {
-  player.inventory.push(item)
-
-  console.log(player.inventory, item)
+  player.inventory[item]++
+  map[player.y][player.x] = floorEmoji
+  player.x = x
+  player.y = y
   map[player.y][player.x] = getIndexSymbolByLife()
+  console.log(player, item, x, y)
   save(id)
   drawInterface()
 }
