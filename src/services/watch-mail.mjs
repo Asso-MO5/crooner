@@ -1,3 +1,4 @@
+import { AttachmentBuilder } from 'discord.js'
 import imaps from 'imap-simple'
 
 const config = {
@@ -57,6 +58,9 @@ export async function watchMail() {
           })
           .join('\n')
 
+        const buffer = Buffer.from(content, 'utf-8')
+        const attachment = new AttachmentBuilder(buffer, { name: 'rule.txt' })
+
         await fetch(process.env.DISCORD_HOOK || '', {
           method: 'POST',
           headers: {
@@ -69,9 +73,10 @@ export async function watchMail() {
       **Sujet**: ${subject}
       **Email**: ${from}
       **Message**
-      ${content}
+      ${content.slice(0, 1800)}
       `,
           }),
+          file: [attachment],
         })
 
         connection.moveMessage(result.attributes.uid, 'INBOX.Discord', () => {})
