@@ -36,7 +36,7 @@ const sendJmsxConfirmGeneratelJob = new CronJob(
 )
 
 const watchMailJob = new CronJob(
-  '*/10 * * * *',
+  '*/5 * * * *',
   watchMail,
   () => console.log('watchMail : ', 'Job done'),
   true, // start
@@ -50,6 +50,7 @@ async function start() {
   const client = await botStart()
 
   watchMailJob.start()
+  watchMail()
   console.log('Jobs started')
   sendJmsxTicketMailJob.start()
 }
