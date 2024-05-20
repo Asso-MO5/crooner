@@ -17,6 +17,7 @@ export async function watchMail() {
   if (imp) return
 
   imaps.connect(config).then((connection) => {
+    console.log('Connected email inbox')
     imp = connection
     return connection.openBox('INBOX').then(async () => {
       const searchCriteria = ['UNSEEN']
