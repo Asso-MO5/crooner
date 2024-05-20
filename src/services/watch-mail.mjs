@@ -67,6 +67,7 @@ export async function watchMail() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            files: [attachment],
             content: `
       --------------------------------
       **Nouvel email**
@@ -76,7 +77,6 @@ export async function watchMail() {
       ${content.slice(0, 1800)}
       `,
           }),
-          file: [attachment],
         })
 
         connection.moveMessage(result.attributes.uid, 'INBOX.Discord', () => {})
