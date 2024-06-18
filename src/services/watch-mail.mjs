@@ -75,6 +75,7 @@ export async function watchMail() {
       **Email**: ${from}
       **Message**
       ${content.slice(0, 1800)}
+      --------------------------------
       `,
           }),
         })
