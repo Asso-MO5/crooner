@@ -102,7 +102,7 @@ export async function sendJmsxTicketMail() {
     try {
       const info = await mailer.sendMail({
         from: '"JMSX" <jmsx@mo5.com>',
-        bcc: [seat.email, 'jmsx@mo5.com'],
+        bcc: [seat.email],
         attachments: [
           {
             filename: `jmsx_billet_${seat.transaction_id}.pdf`,

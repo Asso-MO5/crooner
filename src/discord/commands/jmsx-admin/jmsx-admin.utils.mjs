@@ -68,7 +68,7 @@ ${list(dayOne)}
 **TOTAL** : ${totalDayTwo}
 ${list(dayTwo)}
 
-_Stats provided with ❤️ by JMSX Kazerlelutin bot
+| Crooner provided with ❤️ by Kazerlelutin |
 
 -----------------------------
 
@@ -100,8 +100,14 @@ export function createPaginationSeats(type, _page, noNext = false) {
   return new ActionRowBuilder().addComponents(...row)
 }
 
-export function participationRow(day_one, day_two) {
+export function participationRow(day_zero, day_one, day_two) {
   return new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(JmsxAdminCustomId.participation.day_zero)
+      .setLabel(
+        day_zero ? 'Je ne viens pas' + ' vendredi' : 'Je viens' + ' vendredi'
+      )
+      .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId(JmsxAdminCustomId.participation.day_one)
       .setLabel(

@@ -1,6 +1,7 @@
 import { tables } from '../../../jobs/jmsx/contants.mjs'
 import { createServerClient } from '../../../services/supabase.mjs'
 import { jsmxAdminSeatsOpt } from './jmsx-admin-seats.opt.mjs'
+import { jsmxAdminStaffGenPass } from './jmsx-admin-staff-gen-pass.mjs'
 import { jsmxAdminStaffOptContent } from './jmsx-admin-staff.opt.mjs'
 import { JmsxAdminCustomId } from './jmsx-admin.custom-id.mjs'
 import {
@@ -118,7 +119,8 @@ const btn = {
 
     if (
       interaction.customId === JmsxAdminCustomId.participation.day_one ||
-      interaction.customId === JmsxAdminCustomId.participation.day_two
+      interaction.customId === JmsxAdminCustomId.participation.day_two ||
+      interaction.customId === JmsxAdminCustomId.participation.day_zero
     ) {
       const day = `day_${interaction.customId.split('-').pop()}`
       const supabase = createServerClient()
@@ -145,6 +147,9 @@ const btn = {
         ],
       })
     }
+
+    if (interaction.customId === JmsxAdminCustomId.gen_pass)
+      return await jsmxAdminStaffGenPass(interaction)
 
     await interaction.editReply({
       content: 'aucune action définie pour ce bouton !',

@@ -14,8 +14,10 @@ export const JmsxAdminCustomId = {
     day_two: `${prefix}-per-day-two`,
   },
   return: `${prefix}-return`,
+  gen_pass: `${prefix}-gen-pass`,
   button: prefix,
   participation: {
+    day_zero: `${prefix}-participation-day-zero`,
     day_one: `${prefix}-participation-day-one`,
     day_two: `${prefix}-participation-day-two`,
   },

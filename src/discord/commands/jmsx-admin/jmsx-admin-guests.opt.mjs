@@ -9,7 +9,7 @@ export async function jsmxAdminGuestOptContent() {
   const { data: guests } = await supabase.from(tables.guests).select('*')
 
   return `🚀 **JMSX Admin | ${'invité'.toLocaleUpperCase()} ** 🚀
-### NOM | Samedi | Dimanche
+### NOM | Vendredi | Samedi | Dimanche
 ${guests.length ? '' : 'Aucun invité pour le moment !'}
 ${guests
   .map(
@@ -20,7 +20,7 @@ ${guests
   )
   .join('')}
 
-_Stats provided with ❤️ by JMSX Kazerlelutin bot
+| Crooner provided with ❤️ by Kazerlelutin |
 
 -----------------------------`
 }
