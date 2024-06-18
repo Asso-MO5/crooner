@@ -12,15 +12,21 @@ export async function jsmxAdminStaffOptContent(interaction) {
   const { data: staff } = await supabase.from(tables.staff).select('*')
   const me = staff.find((s) => s.discord_id === interaction.user.id)
 
-  const members = Array.from(await interaction.guild.members.fetch()).filter(
-    (m) => {
-      const [_, member] = m
-      return member.roles.cache.map((r) => r.name).includes('jmsx')
-    }
-  )
+  const discordMembers = await interaction.guild.members.fetch()
+
+  const members = Array.from(discordMembers).filter((m) => {
+    const [_, member] = m
+    return member.roles.cache.map((r) => r.name).includes('jmsx')
+  })
 
   const staffers = staff.map((st) => {
-    const [_, member] = members.find(([id]) => id === st.discord_id)
+    const res = members.find(([id]) => id === st.discord_id)
+    if (!res)
+      return {
+        ...st,
+        unknows: true,
+      }
+    const [_, member] = res
     return {
       ...member.user,
       ...st,
@@ -35,6 +41,7 @@ ${me.day_two ? '✅' : '❌'} Dimanche
 -----------------------------
 ### NOM | Samedi | Dimanche
 ${staffers
+  .filter((st) => !st.unknows)
   .map(
     (st) =>
       `- **${st.username}**  - ${st.day_zero ? '✅' : '❌'} - ${
