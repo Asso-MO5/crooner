@@ -9,6 +9,7 @@ import {
   jsmxAdminRow,
   participationRow,
   returnBtn,
+  returnBtnWithGenPass,
 } from './jmsx-admin.utils.mjs'
 import {
   ModalBuilder,
@@ -143,7 +144,7 @@ const btn = {
         components: [
           participationRow(me.day_one, me.day_two),
           jsmxAdminRow,
-          returnBtn,
+          returnBtnWithGenPass,
         ],
       })
     }

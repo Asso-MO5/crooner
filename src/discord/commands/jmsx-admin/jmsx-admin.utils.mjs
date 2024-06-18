@@ -130,6 +130,17 @@ export const returnBtn = new ActionRowBuilder().addComponents(
     .setStyle(ButtonStyle.Primary)
 )
 
+export const returnBtnWithGenPass = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId(JmsxAdminCustomId.gen_pass)
+    .setLabel(`Générer mon pass`)
+    .setStyle(ButtonStyle.Success),
+  new ButtonBuilder()
+    .setCustomId(JmsxAdminCustomId.return)
+    .setLabel(`Retour au menu principal`)
+    .setStyle(ButtonStyle.Primary)
+)
+
 export const jsmxAdminRow = new ActionRowBuilder().addComponents(
   new StringSelectMenuBuilder()
     .setCustomId(JmsxAdminCustomId.selector)
