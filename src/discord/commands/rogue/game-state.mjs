@@ -11,6 +11,8 @@ function loadGameState(id) {
   if (fs.existsSync(saveFile)) {
     const gameStateString = fs.readFileSync(saveFile)
     return JSON.parse(gameStateString)
+  } else {
+    fs.writeFileSync(gameStateFile.replace('[ID]', id), '{}')
   }
   return null
 }
